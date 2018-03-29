@@ -86,7 +86,7 @@ spark_rotate_log ()
     fi
 }
 
-. "$SPARK_PREFIX/bin/load-spark-env.sh"
+. "$SPARK_HOME/bin/load-spark-env.sh"
 
 if [ "$SPARK_IDENT_STRING" = "" ]; then
   export SPARK_IDENT_STRING="$USER"
@@ -116,7 +116,7 @@ fi
 log="$SPARK_LOG_DIR/spark-$SPARK_IDENT_STRING-$command-$instance-$HOSTNAME.out"
 pid="$SPARK_PID_DIR/spark-$SPARK_IDENT_STRING-$command-$instance-$HOSTNAME.pid"
 
-# Set default scheduling priority
+
 if [ "$SPARK_NICENESS" = "" ]; then
     export SPARK_NICENESS=0
 fi
@@ -146,12 +146,12 @@ run_command() {
 
   case "$mode" in
     (class)
-      nohup nice -n "$SPARK_NICENESS" "$SPARK_PREFIX"/bin/spark-class $command "$@" >> "$log" 2>&1 < /dev/null &
+      nohup nice -n "$SPARK_NICENESS" "$SPARK_HOME"/bin/spark-class $command "$@" >> "$log" 2>&1 < /dev/null &
       newpid="$!"
       ;;
 
     (submit)
-      nohup nice -n "$SPARK_NICENESS" "$SPARK_PREFIX"/bin/spark-submit --class $command "$@" >> "$log" 2>&1 < /dev/null &
+      nohup nice -n "$SPARK_NICENESS" "$SPARK_HOME"/bin/spark-submit --class $command "$@" >> "$log" 2>&1 < /dev/null &
       newpid="$!"
       ;;
 
@@ -219,5 +219,3 @@ case $option in
     ;;
 
 esac
-
-
