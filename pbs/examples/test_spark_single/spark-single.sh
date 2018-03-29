@@ -1,22 +1,19 @@
-#!/bin/bash
-#PBS -l nodes=1:ppn=4,walltime=0:20:00
-#PBS -l vmem=2gb
-#PBS -N spark-wordcount
-#PBS -q test
+#!/usr/bin/env bash
 
-# -l nodes must be equal 1
-# -l vmem set the maximum memory for spark worker process 
+#PBS -N SparkPi
+#PBS -l select=1:ncpus=4:mem=2gb
+#PBS -l walltime=0:20:00
 
-export SPARK_HOME=$HOME/spark-1.4.1-bin-1.2.1  
+cd $PBS_O_WORKDIR
 
-#Manually define PBS_NUM_PPN as same as ppn=xx,
-# since it doesn't define in torque 2.3.7
+# Manually define PBS_NUM_PPN as same as ppn=xx
 PBS_NUM_PPN=4
 
-#Manually set how much memory allocated to each spark worker/driver.
-#It must be equal to PBS -l mem=xx but do not use "mb" or "gb"
-SPARK_MEM="2g"   # just m, M, g or G 
+# Manually set how much memory allocated to each spark worker/driver.
+# It must be equal to PBS -l mem=xx but do not use "mb" or "gb"
+SPARK_MEM="2g" # just m, M, g or G 
 
-$SPARK_HOME/bin/spark-submit --master local[$PBS_NUM_PPN] --class JavaWordCount  --driver-memory $SPARK_MEM $PBS_O_WORKDIR/testjwc.jar file:///etc/services > $PBS_O_WORKDIR/wc.txt
-
-
+# Change the relative path "$SPARK_HOME/examples/jars/spark-examples_${SPARK_VERSION}.jar"
+# to that corresponding to your specific Spark version and instalation paths.
+SPARK_VERSION="2.11-2.3.0"
+$SPARK_HOME/bin/spark-submit --master local[$PBS_NUM_PPN] --class org.apache.spark.examples.SparkPi --driver-memory $SPARK_MEM $SPARK_HOME/examples/jars/spark-examples_${SPARK_VERSION}.jar 40 > $PBS_O_WORKDIR/pi.txt
