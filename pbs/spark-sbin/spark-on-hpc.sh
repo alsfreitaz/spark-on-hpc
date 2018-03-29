@@ -138,9 +138,6 @@ $GEN_FOOTER
 EOF
 
       printf '%s\n' ${nodes[@]:1} > $SPARK_SLAVES
-      echo "SLAVES:: "
-      printf '%s\n' ${nodes[@]:1}
-      echo "${nodes[@]}"
       ;;
 
    vars) 
