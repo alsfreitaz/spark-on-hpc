@@ -1,15 +1,19 @@
 #!/bin/bash
-#
-#PBS -l nodes=3:ppn=2,walltime=0:20:00
-#PBS -l vmem=2gb
-#PBS -N spark-wordcount
-#PBS -q test
 
-# -l nodes must be greater than 1. Support only 1 node spec (no + sign).
+#PBS -l select=3:ncpus=2:mem=2gb:vmem=2gb
+#PBS -l place=scatter
+#PBS -l walltime=0:20:00
+#PBS -N SparkPiMulti
+
+# -l select must be greater than 1. Support only 1 node spec (no + sign).
 # -l vmem set the maximum memory for each spark worker process 
+# -l place=scatter tries to allocate different machines/nodes as much as possible
 
-export SPARK_HOME=$HOME/spark-1.4.1-bin-1.2.1  
+# Manually define PBS_NUM_PPN as same as select=x
+export PBS_NUM_PPN=3
 export SPARK_JOB_DIR=$PBS_O_WORKDIR
+# Set SPARK_WORKER_MEMORY the same as vmem but without the ending 'b' of bytes
+export SPARK_WORKER_MEMORY='2g' # just m, M, g or G 
 
 # Create/append spark configuration in SPARK_JOB_DIR from PBS environments. 
 # Specific spark configuration can be put into the SPARK_JOB_DIR/conf/* a priori.
@@ -27,11 +31,12 @@ source $SPARK_HOME/sbin/spark-on-hpc.sh vars
 
 SPARK_URL=spark://$SPARK_MASTER_IP:$SPARK_MASTER_PORT
 WEBUI_URL=http://$SPARK_MASTER_IP:$SPARK_MASTER_WEBUI_PORT
-
-# Submit a spark job. 
-# The driver and executor memory is defined from -l vmem
-$SPARK_HOME/bin/spark-submit --master $SPARK_URL --class JavaWordCount $PBS_O_WORKDIR/testjwc.jar file:///etc/services > $PBS_O_WORKDIR/wc.txt
+ 
+# The driver and executor memory are defined internally from SPARK_WORKER_MEMORY.
+# Change the relative path "$SPARK_HOME/examples/jars/spark-examples_${SPARK_VERSION}.jar"
+# to that corresponding to your specific Spark version and instalation paths.
+SPARK_VERSION="2.11-2.3.0"
+$SPARK_HOME/bin/spark-submit --master $SPARK_URL --class org.apache.spark.examples.SparkPi $SPARK_HOME/examples/jars/spark-examples_${SPARK_VERSION}.jar 40 > $PBS_O_WORKDIR/pi.txt
 
 # Stop the spark cluster
 $SPARK_HOME/sbin/spark-on-hpc.sh stop
-
