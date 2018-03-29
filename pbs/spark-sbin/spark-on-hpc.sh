@@ -36,7 +36,6 @@ case "$1" in
       if [ -z "$SPARK_MASTER_PORT" ] || [ "$SPARK_MASTER_PORT" = "RANDOM" ]; then
          RANDOM_PORT_CMD="python -c 'import socket; s1=socket.socket(); s1.bind((\"\", 0)); s2=socket.socket(); s2.bind((\"\",0)); print(\"%d %d\" % (s1.getsockname()[1],s2.getsockname()[1])); s1.close(); s2.close()'"
          RANDOM_PORTS=`ssh $SPARK_MASTER_IP $RANDOM_PORT_CMD`
-
          read SPARK_MASTER_PORT SPARK_MASTER_WEBUI_PORT <<< $(echo $RANDOM_PORTS)
          if [ -z "$SPARK_MASTER_PORT" ]; then
             echo "Cannot find a random port" >&2
@@ -99,7 +98,7 @@ case "$1" in
          exit 1
       fi
 
-      nodes=($( cat "$PBS_NODEFILE" | awk -v N=$PBS_NUM_PPN '{if (++count%N==0) print $0}' | sort ))
+      nodes=($( cat "$PBS_NODEFILE" | sort ))
       nnodes=${#nodes[@]}
       last=$(( $nnodes - 1 ))
 
@@ -108,31 +107,6 @@ case "$1" in
       SPARK_LOG_DIR=$SPARK_JOB_DIR/logs
       SPARK_PID_DIR=$SPARK_LOG_DIR
       SPARK_SLAVES=$SPARK_CONF_DIR/slaves
-
-      MAX_MEM=`ulimit -v`
-      if [ "$MAX_MEM" = "unlimited" ] || [ -z "$MAX_MEM" ]; then
-         echo "WARNING -l vmem not set, use spark memory 1gb by default" >&2
-         SPARK_WORKER_MEMORY="1g"
-      else 
-         SPARK_WORKER_MEMORY="$((($MAX_MEM+1024-1)/1024))m"
-      fi
-
-      #
-      # If nodes > 1, -l mem is ignored.
-      # -l pmem override -l mem.
-      # If there is pmem, Torque finds a node with at least pmem*ppn memory.
-      # But ulimit = -l pmem, a worker can only see pmem memory.
-      # USE -l vmem seems to solve problems
-      #
-      #if [ ! -z "$PBS_PMEM" ]; then
-      #   PMEM=${PBS_PMEM%?}    # trim last character, assuming "b"
-      #   PMEM_SIZE=${PMEM%?}   # get number
-      #   PMEM_UNIT=${PMEM: -1} # get last character, assuming m or g
-      #   SPARK_WORKER_MEMORY="$(($PMEM_SIZE*$PBS_NUM_PPN))$PMEM_UNIT"
-      #else
-      #   SPARK_WORKER_MEMORY="1g"
-      #fi
-
       SPARK_MASTER_IP=${nodes[0]}
 
       mkdir -p $SPARK_CONF_DIR
@@ -164,6 +138,9 @@ $GEN_FOOTER
 EOF
 
       printf '%s\n' ${nodes[@]:1} > $SPARK_SLAVES
+      echo "SLAVES:: "
+      printf '%s\n' ${nodes[@]:1}
+      echo "${nodes[@]}"
       ;;
 
    vars) 
