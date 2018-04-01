@@ -16,11 +16,11 @@ Spark-on-HPC dynamically provisions Apache Spark clusters and run spark jobs on 
 * Download and unpack Spark package into `SPARK_HOME` directory
 * Download and unzip the Spark-on-HPC package. Change directory to `SPARK_ON_HPC`.
 ```
-#cd $SPARK_ON_HPC
+$ cd $SPARK_ON_HPC
 ```
 * Copy scripts into `$SPARK_HOME/sbin`:
 ```
-#cp pbs/spark-sbin/* $SPARK_HOME/sbin
+$ cp pbs/spark-sbin/* $SPARK_HOME/sbin
 ```
 
 # Usage
@@ -36,7 +36,7 @@ $ cd test
 ## PBS
 * Copy an example job script inside the package. There are two examples in the package. One is for single node script. The other is for multiple node script.
 ```
-#cp $SPARK_ON_HPC/examples/test_spark_multi/spark_multi.sh test_spark_job.sh
+$ cp $SPARK_ON_HPC/examples/test_spark_multi/spark_multi.sh test_spark_job.sh
 ```
 * Make changes to the script. Usually, the directives, shell variables and spark-submit arguments are changeable. Set directives. For a PBS example, request 5 nodes (1 master + 4 workers), each with 2 cores and 1gb memory allocated.
 ```
@@ -54,7 +54,7 @@ $SPARK_HOME/bin/spark-submit --master $SPARK_URL --class org.apache.spark.exampl
 ```
 * Submit the job:
 ```
-#qsub test_spark_job.sh
+$ qsub test_spark_job.sh
 ```
 The directories conf, logs, and work will be created in `SPARK_JOB_DIR` during the execution of spark. Examine them if necessary in addition to the normal job stdout and stderr files.
 
