@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#PBS -l select=3:ncpus=2:mem=2gb:vmem=2gb
+#PBS -l select=1:ncpus=2:mem=1gb:vmem=1gb+2:ncpus=2:mem=2gb:vmem=2gb
 #PBS -l place=scatter
 #PBS -l walltime=0:20:00
 #PBS -N SparkPiMulti
